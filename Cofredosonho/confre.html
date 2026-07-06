@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cofre dos Sonhos — Guarde seus sonhos, reviva no futuro</title>
-  <meta name="description" content="Plataforma onde você escreve sonhos, metas e planos, tranca em um cofre digital com data futura e recebe uma retrospectiva no dia marcado.">
+  <meta name="description" content="Escreva seus sonhos, metas e planos e tranque num cofre digital com data de abertura futura. Construa uma timeline, compartilhe com quem ama e transforme metas em memórias.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -95,16 +95,25 @@ img { max-width:100%; display:block; }
   max-width:var(--max-width); margin:0 auto; height:100%;
   display:flex; align-items:center; justify-content:space-between; padding:0 24px;
 }
-.header-logo {
+/* DevSpace logo — volta ao portfólio */
+.logo {
   display:flex; align-items:center; gap:10px;
-  font-weight:700; font-size:1.15rem; cursor:pointer;
+  font-weight:700; font-size:1.25rem; letter-spacing:-0.02em;
+  cursor:pointer; transition:var(--transition);
 }
-.header-logo span:first-child { font-size:1.4rem; }
-.header-logo span:last-child {
-  background:var(--gradient-gold); -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent; background-clip:text;
+.logo:hover { transform:scale(1.03); }
+.logo-icon {
+  width:34px; height:34px; border-radius:10px;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6,#06b6d4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.95rem; font-weight:800; color:#fff;
+  box-shadow:0 0 20px rgba(59,130,246,0.3);
 }
-.header-nav { display:flex; align-items:center; gap:8px; }
+.logo-text {
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6,#06b6d4);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.header-nav { display:flex; align-items:center; gap:6px; }
 .header-nav a, .header-nav button {
   padding:8px 16px; border-radius:8px; font-size:0.85rem; font-weight:500;
   color:var(--text-secondary); transition:var(--transition);
@@ -112,19 +121,21 @@ img { max-width:100%; display:block; }
 .header-nav a:hover, .header-nav button:hover {
   color:var(--text-primary); background:rgba(255,255,255,0.05);
 }
+.app-nav { display:flex; align-items:center; gap:6px; }
 .header-nav .btn-gold {
   background:var(--gradient-gold); color:#000; font-weight:600;
   padding:8px 20px; border-radius:8px;
 }
 .header-nav .btn-gold:hover { opacity:0.9; transform:translateY(-1px); }
-.user-avatar {
-  width:32px; height:32px; border-radius:50%; border:2px solid var(--gold-500);
-  object-fit:cover; cursor:pointer;
-}
-.user-menu {
-  display:flex; align-items:center; gap:12px;
-}
 .user-name { font-size:0.85rem; color:var(--text-secondary); }
+/* Foto de perfil — no lugar do GitHub, volta à página inicial */
+.profile-home {
+  display:flex; width:36px; height:36px; border-radius:50%;
+  overflow:hidden; border:2px solid var(--gold-500);
+  transition:var(--transition); flex-shrink:0;
+}
+.profile-home img { width:100%; height:100%; object-fit:cover; }
+.profile-home:hover { transform:scale(1.08); box-shadow:0 0 15px rgba(251,191,36,0.4); }
 .mobile-toggle {
   display:none; flex-direction:column; gap:4px; padding:8px; cursor:pointer;
 }
@@ -775,26 +786,33 @@ img { max-width:100%; display:block; }
 <!-- ========== HEADER ========== -->
 <header class="header">
   <div class="header-inner">
-    <a class="header-logo" onclick="navigate('landing')">
-      <span>🔒</span>
-      <span>Cofre dos Sonhos</span>
+    <!-- DevSpace logo -> volta ao portfólio -->
+    <a href="../index.html" class="logo" title="Voltar ao DevSpace">
+      <div class="logo-icon">&lt;/&gt;</div>
+      <span class="logo-text">DevSpace</span>
     </a>
     <nav class="header-nav" id="header-nav">
-      <!-- Guest Nav -->
-      <div id="nav-guest">
-        <a onclick="navigate('landing')">Início</a>
+      <!-- Links do portfólio -->
+      <a href="../index.html#home">Home</a>
+      <a href="../index.html#projetos">Projetos</a>
+      <a href="../index.html#sobre">Sobre</a>
+      <a href="../index.html#contato">Contato</a>
+      <!-- App: convidado -->
+      <div id="nav-guest" class="app-nav">
         <button class="btn-gold" onclick="navigate('login')">Entrar</button>
       </div>
-      <!-- Auth Nav -->
-      <div id="nav-auth" class="hidden">
+      <!-- App: autenticado -->
+      <div id="nav-auth" class="app-nav hidden">
         <a onclick="navigate('dashboard')">Meus Cofres</a>
         <a onclick="navigate('settings')">⚙️</a>
-        <div class="user-menu">
-          <span class="user-name" id="user-name"></span>
-          <button class="btn-ghost btn-sm" onclick="handleLogout()">Sair</button>
-        </div>
+        <span class="user-name" id="user-name"></span>
+        <button class="btn-ghost btn-sm" onclick="handleLogout()">Sair</button>
       </div>
     </nav>
+    <!-- Foto -> volta à página inicial (no lugar do GitHub) -->
+    <a href="../index.html" class="profile-home" title="Voltar à página inicial">
+      <img src="../img/RodrigoNeris.png" alt="Rodrigo Neris">
+    </a>
     <button class="mobile-toggle" onclick="toggleMobileMenu()">
       <span></span><span></span><span></span>
     </button>
@@ -811,8 +829,9 @@ img { max-width:100%; display:block; }
         reviva no <span class="gold">futuro</span>
       </h1>
       <p class="landing-subtitle">
-        Escreva seus sonhos, metas e planos. Tranque em um cofre digital com data futura.
-        Receba uma retrospectiva com tudo o que escreveu, sua timeline e mensagens de apoio.
+        Escreva seus sonhos, metas e planos e tranque num cofre digital com data de abertura futura.
+        Construa uma timeline, compartilhe com quem ama e transforme metas em memórias —
+        vendo, com o tempo, o quanto você evoluiu até chegar lá.
       </p>
       <div class="cta-group">
         <button class="btn btn-gold-lg" onclick="navigate('register')">Criar Meu Cofre ✨</button>
