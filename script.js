@@ -15,7 +15,16 @@
   let mouseY = window.innerHeight / 2;
   let currentX = mouseX;
   let currentY = mouseY;
-  const lerpFactor = 0.08;
+  const lerpFactor = 0.12;
+
+  // Dot-field configuration (antigravity-style)
+  const CELL = 26;          // grid spacing (px) — smaller = more dots
+  const DOT_R = 1.6;        // radius of each little dot (px)
+  const RADIUS = 220;       // light influence radius around the pointer (px)
+  const RADIUS2 = RADIUS * RADIUS;
+  const COLOR = '37, 99, 235'; // royal blue (blue-600)
+
+  let time = 0;
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -26,45 +35,54 @@
     return a + (b - a) * t;
   }
 
+  // Deterministic pseudo-random per cell (0..1), so each dash keeps its identity
+  function hash(col, row) {
+    const n = Math.sin(col * 127.1 + row * 311.7) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
   function drawGlow() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    time += 0.03;
 
     currentX = lerp(currentX, mouseX, lerpFactor);
     currentY = lerp(currentY, mouseY, lerpFactor);
 
-    // Primary glow — blue/violet
-    const gradient1 = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, 500);
-    gradient1.addColorStop(0, 'rgba(59, 130, 246, 0.12)');
-    gradient1.addColorStop(0.3, 'rgba(139, 92, 246, 0.06)');
-    gradient1.addColorStop(0.6, 'rgba(6, 182, 212, 0.03)');
-    gradient1.addColorStop(1, 'transparent');
+    // Only iterate the grid cells inside the light radius (performance)
+    const startCol = Math.floor((currentX - RADIUS) / CELL);
+    const endCol = Math.ceil((currentX + RADIUS) / CELL);
+    const startRow = Math.floor((currentY - RADIUS) / CELL);
+    const endRow = Math.ceil((currentY + RADIUS) / CELL);
 
-    ctx.fillStyle = gradient1;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let col = startCol; col <= endCol; col++) {
+      for (let row = startRow; row <= endRow; row++) {
+        const rnd = hash(col, row);
+        // Small per-dot drift so the field feels alive / in motion
+        const driftX = Math.sin(time + rnd * 6.28) * 3;
+        const driftY = Math.cos(time * 0.8 + rnd * 6.28) * 3;
+        const cx = col * CELL + CELL / 2 + driftX;
+        const cy = row * CELL + CELL / 2 + driftY;
 
-    // Secondary glow — offset cyan
-    const gradient2 = ctx.createRadialGradient(
-      currentX + 100, currentY - 80, 0,
-      currentX + 100, currentY - 80, 350
-    );
-    gradient2.addColorStop(0, 'rgba(6, 182, 212, 0.07)');
-    gradient2.addColorStop(0.5, 'rgba(139, 92, 246, 0.03)');
-    gradient2.addColorStop(1, 'transparent');
+        const dx = cx - currentX;
+        const dy = cy - currentY;
+        const dist2 = dx * dx + dy * dy;
+        if (dist2 > RADIUS2) continue;
 
-    ctx.fillStyle = gradient2;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Falloff: 1 at the pointer, 0 at the edge (eased)
+        let t = 1 - Math.sqrt(dist2) / RADIUS;
+        t = t * t;
 
-    // Tertiary glow — pink accent
-    const gradient3 = ctx.createRadialGradient(
-      currentX - 120, currentY + 60, 0,
-      currentX - 120, currentY + 60, 280
-    );
-    gradient3.addColorStop(0, 'rgba(236, 72, 153, 0.05)');
-    gradient3.addColorStop(0.6, 'rgba(236, 72, 153, 0.02)');
-    gradient3.addColorStop(1, 'transparent');
+        // Gentle twinkle so dots flicker in and out of view
+        const twinkle = 0.55 + 0.45 * Math.sin(time * 2 + rnd * 12.56);
+        const alpha = t * twinkle * 0.7;
+        if (alpha < 0.02) continue;
 
-    ctx.fillStyle = gradient3;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = `rgba(${COLOR}, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(cx, cy, DOT_R, 0, 6.2832);
+        ctx.fill();
+      }
+    }
 
     requestAnimationFrame(drawGlow);
   }
